@@ -1,0 +1,16 @@
+mfm-sr
+Copyright 2026 the authors of "Multimodal attention fusion-based sequential recommendation system"
+
+This repository contains a modified copy of DIF-SR (https://github.com/AIM-SE/DIF-SR),
+licensed under the Apache License, Version 2.0 (see LICENSE).
+DIF-SR is built on RecBole (https://github.com/RUCAIBox/RecBole),
+licensed under the MIT License (see licenses/RecBole-LICENSE.txt).
+
+Modifications to the DIF-SR code:
+- Added the proposed model SASRecDM_MTL (recbole/model/sequential_recommender/sasrecdm_mtl.py):
+  a multimodal fusion module over category, image, and text representations with
+  modality-specific multi-task losses.
+- Added experimental model variants used during development (e.g. sasrecdm*.py).
+- Removed two backup files of an experimental variant.
+
+New in this repository: the preprocessing pipeline (preprocess/) and its tests (tests/).

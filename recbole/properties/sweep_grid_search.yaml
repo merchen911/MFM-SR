@@ -1,0 +1,17 @@
+program: sweep_run_recbole.py 
+method: grid
+metric:
+    goal: maximize
+    name: Recall@20
+parameters:
+    attribute_hidden_size:
+        values: [[32, 32, 32], [64, 64, 64]]
+        # values: [[32, 32, 32], [64, 64, 64], [128, 128, 128], [256, 256, 256]]
+    # n_heads:
+    #     values: [2, 4, 8]
+    # n_layers:
+    #     values: [2, 3, 4]
+    # lamdas:
+    #     values: [[5, 5, 5], [10, 10, 10], [15, 15, 15], [20, 20, 20], [25, 25, 25]]
+    fusion_type:
+        values: ['gate', 'concat', 'sum']
