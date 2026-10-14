@@ -11,6 +11,9 @@ Modifications to the DIF-SR code:
   a multimodal fusion module over category, image, and text representations with
   modality-specific multi-task losses.
 - Added experimental model variants used during development (e.g. sasrecdm*.py).
+- Changed existing files: recbole/utils/logger.py (log directory and file-suffix options),
+  recbole/utils/argument_list.py, and the model registrations in
+  recbole/model/sequential_recommender/__init__.py.
 - Removed two backup files of an experimental variant.
 
 New in this repository: the preprocessing pipeline (preprocess/) and its tests (tests/).
