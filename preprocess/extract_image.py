@@ -13,6 +13,7 @@ import argparse
 import csv
 import io
 import time
+import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -34,14 +35,20 @@ def candidate_urls(urls) -> list:
 
 
 def fetch_bytes(url: str, timeout: float = 20, retries: int = 3, backoff: float = 1.0) -> bytes:
+    retries = max(1, retries)
     last = None
     for attempt in range(retries):
         try:
             req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
             with urllib.request.urlopen(req, timeout=timeout) as r:
                 return r.read()
+        except urllib.error.HTTPError as e:
+            if 400 <= e.code < 500 and e.code not in (408, 429):
+                raise  # permanent client error: do not retry
+            last = e
         except Exception as e:  # network errors are retried, then reported
             last = e
+        if attempt < retries - 1:
             time.sleep(backoff * (attempt + 1))
     raise last
 
@@ -65,7 +72,8 @@ def load_image(asin: str, urls, cache_dir: Path, retries: int = 3, backoff: floa
             data = fetch_bytes(url, retries=retries, backoff=backoff)
             img = _decode(data)
         except Exception as e:
-            errors.append(f"{url}: {type(e).__name__}")
+            status = f" {e.code}" if isinstance(e, urllib.error.HTTPError) else ""
+            errors.append(f"{url}: {type(e).__name__}{status}")
             continue
         cache_dir.mkdir(parents=True, exist_ok=True)
         tmp = path.with_name(path.name + ".tmp")

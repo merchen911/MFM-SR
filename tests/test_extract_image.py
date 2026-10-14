@@ -1,3 +1,6 @@
+import urllib.error
+import urllib.request
+
 import numpy as np
 import pytest
 from PIL import Image
@@ -43,6 +46,49 @@ def test_non_image_content_is_a_failure(tmp_path):
 def test_no_url_is_a_failure(tmp_path):
     img, err = ei.load_image("D1", [], tmp_path / "cache", retries=1, backoff=0)
     assert img is None and err == "no image URL"
+
+
+def _http_error(url, code):
+    return urllib.error.HTTPError(url, code, "err", {}, None)
+
+
+def _patch_urlopen(monkeypatch, code):
+    calls, sleeps = [], []
+
+    def fake_urlopen(req, timeout=None):
+        calls.append(req.full_url)
+        raise _http_error(req.full_url, code)
+
+    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
+    monkeypatch.setattr(ei.time, "sleep", lambda s: sleeps.append(s))
+    return calls, sleeps
+
+
+def test_http_404_is_not_retried(monkeypatch):
+    calls, sleeps = _patch_urlopen(monkeypatch, 404)
+    with pytest.raises(urllib.error.HTTPError):
+        ei.fetch_bytes("http://x/a.jpg", retries=3, backoff=1)
+    assert len(calls) == 1 and sleeps == []
+
+
+def test_http_503_is_retried_without_final_sleep(monkeypatch):
+    calls, sleeps = _patch_urlopen(monkeypatch, 503)
+    with pytest.raises(urllib.error.HTTPError):
+        ei.fetch_bytes("http://x/a.jpg", retries=3, backoff=1)
+    assert len(calls) == 3 and len(sleeps) == 2
+
+
+def test_retries_zero_means_one_attempt(monkeypatch):
+    calls, _ = _patch_urlopen(monkeypatch, 503)
+    with pytest.raises(urllib.error.HTTPError):
+        ei.fetch_bytes("http://x/a.jpg", retries=0, backoff=0)
+    assert len(calls) == 1
+
+
+def test_failure_message_contains_http_status(monkeypatch, tmp_path):
+    _patch_urlopen(monkeypatch, 404)
+    img, err = ei.load_image("E1", ["http://x/a.jpg"], tmp_path / "cache", retries=3, backoff=0)
+    assert img is None and "http://x/a.jpg: HTTPError 404" in err
 
 
 @pytest.fixture(scope="module")
