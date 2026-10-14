@@ -6,3 +6,5 @@ log_tensorboard/
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
+.superpowers/
+.pytest_cache/
