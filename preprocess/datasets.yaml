@@ -1,0 +1,22 @@
+# Preprocessing configuration. Relative paths are resolved against the repository root.
+raw_dir: data/raw
+interim_dir: data/interim
+processed_dir: data/processed
+image_cache_dir: data/raw/images
+
+years: [2016, 2017]          # keep interactions from these years only
+rare_category_min_count: 5   # category tokens seen fewer times are removed
+
+sources:
+  clothing:
+    reviews: Clothing_Shoes_and_Jewelry_5.json.gz
+    meta: meta_Clothing_Shoes_and_Jewelry.json.gz
+  video_games:
+    reviews: Video_Games_5.json.gz
+    meta: meta_Video_Games.json.gz
+
+datasets:
+  Video_Games: {source: video_games, split: null, category_rule: video_games}
+  Boys_Girls: {source: clothing, split: boys_girls, category_rule: clothing}
+  Women: {source: clothing, split: women, category_rule: clothing}
+  Men: {source: clothing, split: men, category_rule: clothing}
