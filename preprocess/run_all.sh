@@ -11,8 +11,22 @@ cd "$(dirname "$0")/.."
 PYTHON="${PYTHON:-python}"
 DEVICE="${DEVICE:-cpu}"
 read -r -a DS <<< "${DATASETS:-Video_Games Boys_Girls Women Men}"
+usage() {
+  cat <<'EOF'
+Usage: bash preprocess/run_all.sh [--force]
+  --force    rebuild all outputs (default: skip existing outputs)
+  -h, --help show this help
+Environment variables: PYTHON, DEVICE, DATASETS
+EOF
+}
 FORCE=()
-if [[ "${1:-}" == "--force" ]]; then FORCE=(--force); fi
+case "${1:-}" in
+  "") ;;
+  --force) FORCE=(--force) ;;
+  -h|--help) usage; exit 0 ;;
+  *) usage >&2; exit 2 ;;
+esac
+if [[ $# -gt 1 ]]; then usage >&2; exit 2; fi
 
 "$PYTHON" preprocess/build_interactions.py --datasets "${DS[@]}" ${FORCE[@]+"${FORCE[@]}"}
 "$PYTHON" preprocess/clean_categories.py --datasets "${DS[@]}" ${FORCE[@]+"${FORCE[@]}"}

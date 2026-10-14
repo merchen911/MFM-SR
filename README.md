@@ -15,7 +15,7 @@ The repository contains
 
 ## 1. Environment
 
-Tested with Python 3.10 and the versions in `requirements.txt` (PyTorch 2.2.1 with CUDA 12.1).
+Requires Python >= 3.10 (tested with 3.10) and the versions in `requirements.txt` (PyTorch 2.2.1 with CUDA 12.1).
 
 ```bash
 pip install -r requirements.txt        # add -r requirements-dev.txt to run the tests
@@ -49,16 +49,33 @@ DEVICE=cuda:0 bash preprocess/run_all.sh          # or DEVICE=cpu
 | 5 | `write_atomic.py`: write the features in RecBole format | `data/processed/<dataset>/<dataset>.itememb_{text,image}` |
 
 - Each stage skips outputs that already exist; `bash preprocess/run_all.sh --force` rebuilds everything.
-- Items whose image cannot be downloaded receive a zero image vector and are listed in `data/interim/<dataset>/image_failures.csv`. Downloaded images are cached in `data/raw/images/`, so an interrupted image stage resumes where it stopped. Downloading all images of Women and Men takes several hours.
-- Users and items with fewer than five interactions are removed iteratively (5-core filtering) by RecBole when the data are loaded (`user_inter_num_interval` and `item_inter_num_interval` set to `"[5,inf)"`).
-- Every script accepts `--datasets` and `--help`.
+- Items whose image cannot be downloaded receive a zero image vector and are listed in `data/interim/<dataset>/image_failures.csv`. Downloaded images are cached in `data/raw/images/`; after an interruption, cached images are reused, but encoding restarts and previously failed items are retried. Downloading all images of Women and Men can take many hours.
+- Disk use: the image cache holds about 123k images for Women alone, and the `.itememb_image` files are several GB.
+- The `.inter` files keep all interactions of the selected years. RecBole applies iterative 5-core filtering at load time when `user_inter_num_interval` and `item_inter_num_interval` are set to `"[5,inf)"` (see Section 4).
+- Each Python stage script accepts `--datasets`, `--force` and `--help`; `run_all.sh` takes `--force` and the `DATASETS`, `DEVICE` and `PYTHON` environment variables.
 
 ## 4. Models
 
 The proposed model is implemented in `recbole/model/sequential_recommender/sasrecdm_mtl.py`.
-The files written by the preprocessing pipeline are standard RecBole atomic files; the feature files
-are linked to the item IDs through `alias_of_item_id: [itemid_image, itemid_text]` and
-`preload_weight: {itemid_image: item_image_emb, itemid_text: item_text_emb}` in the RecBole configuration.
+The files written by the preprocessing pipeline are standard RecBole atomic files. Training
+configuration files are not included in this repository. The minimum RecBole configuration needed
+to use the produced files is:
+
+```yaml
+data_path: data/processed/
+load_col:
+  inter: [user_id, item_id, timestamp]
+  item: [item_id, categories]
+  itememb_image: [itemid_image, item_image_emb]
+  itememb_text: [itemid_text, item_text_emb]
+additional_feat_suffix: [itememb_image, itememb_text]
+alias_of_item_id: [itemid_image, itemid_text]
+preload_weight:
+  itemid_image: item_image_emb
+  itemid_text: item_text_emb
+user_inter_num_interval: "[5,inf)"   # iterative 5-core filtering at load time
+item_inter_num_interval: "[5,inf)"
+```
 
 ## License and acknowledgements
 
