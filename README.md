@@ -4,6 +4,7 @@ Code for **"Multimodal attention fusion-based sequential recommendation system"*
 (H. Oh, W. Jo, D. Kim; under review at *Heliyon*).
 
 The repository contains
+- `data/processed/`: the interaction and item files used in the experiments (gzip-compressed),
 - `preprocess/`: a pipeline that turns the raw Amazon Review Data (2018) into RecBole atomic files,
 - `recbole/`: a modified copy of DIF-SR / RecBole that includes the proposed model (`SASRecDM_MTL`) and the baselines.
 
@@ -22,10 +23,34 @@ pip install -r requirements.txt        # add -r requirements-dev.txt to run the 
 python -m pytest tests                 # optional
 ```
 
-## 2. Raw data
+## 2. Data
 
-Download the following four files of the Amazon Review Data (2018) from
-https://nijianmo.github.io/amazon/index.html and place them in `data/raw/`:
+### Interaction and item files (included)
+
+The interaction (`.inter`) and item (`.item`) files used in the experiments are included as gzip files,
+for `<dataset>` = `Video_Games`, `Boys_Girls`, `Women` and `Men`:
+
+```
+data/processed/<dataset>/<dataset>.inter.gz
+data/processed/<dataset>/<dataset>.item.gz
+```
+
+Decompress them before use:
+
+```bash
+gunzip -k data/processed/*/*.gz
+```
+
+Running stages 1-2 of the pipeline (Section 3) on our copy of the raw data reproduces these files
+byte for byte. Raw files downloaded from the dataset page today may differ if the dataset has been
+updated since then. The image and text feature files (`.itememb_image`, `.itememb_text`) are not
+included; stages 3-5 build them from the raw data.
+
+### Raw data
+
+To rebuild the files or to build the image and text features, download the following four files of the
+Amazon Review Data (2018) from https://nijianmo.github.io/amazon/index.html (the metadata files are
+provided through a request form on that page) and place them in `data/raw/`:
 
 ```
 data/raw/Clothing_Shoes_and_Jewelry_5.json.gz
