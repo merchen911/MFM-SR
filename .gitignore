@@ -1,8 +1,8 @@
-data/
-results*/
-saved/
-log/
-log_tensorboard/
+/data/
+/results*/
+/saved/
+/log/
+/log_tensorboard/
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
