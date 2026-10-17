@@ -106,12 +106,12 @@ item_inter_num_interval: "[5,inf)"
 ## 5. Per-seed results
 
 `table3/per_seed_results.csv` lists the test results of every model on every dataset for each of the
-five random seeds (101, 202, 303, 404 and 505) used for Table 3 of the paper, as recorded in the
-training logs (four decimal places). Columns: `dataset`, `model` (names as in the paper), `seed`,
+ten random seeds (101, 202, 303, 404, 505, 606, 707, 808, 909 and 1010) used for Table 3 of the paper,
+as recorded in the training logs (four decimal places). Columns: `dataset`, `model` (names as in the paper), `seed`,
 `Recall@10`, `Recall@20`, `NDCG@10` and `NDCG@20`.
 
-Table 3 reports the mean over the five seeds ± the half-width of the 95% confidence interval,
-t(0.975, 4) · s / √5, where s is the sample standard deviation. Where the proposed model is the best,
+Table 3 reports the mean over the ten seeds ± the half-width of the 95% confidence interval,
+t(0.975, 9) · s / √10, where s is the sample standard deviation. Where the proposed model is the best,
 an asterisk marks a significant improvement over the second-best model (one-sided Wilcoxon
 signed-rank test paired by seed, p < 0.05).
 
